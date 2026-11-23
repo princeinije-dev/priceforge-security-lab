@@ -1,0 +1,118 @@
+<%- include("../../partials/admin-header", { title: "Inventory Catalog" }) %>
+
+<div class="admin-page-header">
+  <div>
+    <span class="eyebrow">HARDWARE ASSETS</span>
+    <h1>Product Inventory (<%= totalItems %>)</h1>
+    <p>Manage product catalog, prices, categories, and stock allocation.</p>
+  </div>
+  <div class="admin-header-actions">
+    <a href="/admin/products/new" class="btn-primary btn-sm">+ Add New Hardware</a>
+  </div>
+</div>
+
+<div class="admin-filter-bar">
+  <form action="/admin/products" method="GET" class="admin-search-form">
+    <input 
+      type="text" 
+      name="search" 
+      placeholder="Search by title or description..." 
+      value="<%= typeof search !== 'undefined' ? search : '' %>"
+      class="form-input form-input-sm"
+    >
+    <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">All Categories</option>
+      <option value="Audio" <%= typeof category !== 'undefined' && category === 'Audio' ? 'selected' : '' %>>Audio</option>
+      <option value="Gaming" <%= typeof category !== 'undefined' && category === 'Gaming' ? 'selected' : '' %>>Gaming</option>
+      <option value="Accessories" <%= typeof category !== 'undefined' && category === 'Accessories' ? 'selected' : '' %>>Accessories</option>
+      <option value="Connectivity" <%= typeof category !== 'undefined' && category === 'Connectivity' ? 'selected' : '' %>>Connectivity</option>
+    </select>
+    <button type="submit" class="btn-secondary btn-sm">Filter</button>
+    <% if (search || category) { %>
+      <a href="/admin/products" class="btn-text-muted btn-sm">Reset</a>
+    <% } %>
+  </form>
+</div>
+
+<div class="panel-card">
+  <% if (!products || products.length === 0) { %>
+    <div class="panel-empty-state">
+      <p>No products match your current filter.</p>
+      <a href="/admin/products" class="btn-secondary btn-sm">Reset Filters</a>
+    </div>
+  <% } else { %>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Hardware Product</th>
+          <th>Category</th>
+          <th>Retail Price</th>
+          <th>Stock</th>
+          <th>Visibility</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% products.forEach(prod => { %>
+          <tr>
+            <td>
+              <div class="table-product-cell">
+                <div class="table-product-thumb">
+                  <% if (prod.image_url) { %>
+                    <img src="<%= prod.image_url %>" alt="<%= prod.name %>">
+                  <% } else { %>
+                    <div class="table-thumb-placeholder">DEVICE</div>
+                  <% } %>
+                </div>
+                <div>
+                  <strong><a href="/products/<%= prod.id %>" target="_blank"><%= prod.name %></a></strong>
+                  <small class="text-muted d-block">ID: <code><%= String(prod.id).slice(0, 8) %>...</code></small>
+                </div>
+              </div>
+            </td>
+            <td><span class="category-pill-sm"><%= prod.category %></span></td>
+            <td><strong>₦<%= Number(prod.price).toLocaleString("en-NG") %></strong></td>
+            <td>
+              <% if (prod.stock > 10) { %>
+                <span class="stock-num-pill in-stock"><%= prod.stock %> units</span>
+              <% } else if (prod.stock > 0) { %>
+                <span class="stock-num-pill warning"><%= prod.stock %> units</span>
+              <% } else { %>
+                <span class="stock-num-pill empty">Sold out</span>
+              <% } %>
+            </td>
+            <td>
+              <form action="/admin/products/<%= prod.id %>/toggle" method="POST" style="display:inline;">
+                <button type="submit" class="status-badge <%= prod.is_active ? 'status-delivered' : 'status-cancelled' %>" style="border:none; cursor:pointer;" title="Click to toggle active status">
+                  <%= prod.is_active ? 'Active' : 'Inactive' %>
+                </button>
+              </form>
+            </td>
+            <td class="text-right">
+              <div class="table-actions-inline">
+                <a href="/admin/products/<%= prod.id %>/edit" class="btn-secondary btn-xs">Edit</a>
+                <form action="/admin/products/<%= prod.id %>/delete" method="POST" onsubmit="return confirm('Delete <%= prod.name %> permanently?')" style="display:inline;">
+                  <button type="submit" class="btn-text-danger btn-xs">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+    <!-- Admin Pagination -->
+    <% if (totalPages > 1) { %>
+      <div class="pagination-bar" style="margin-top: 20px;">
+        <% for (let p = 1; p <= totalPages; p++) { %>
+          <a href="/admin/products?page=<%= p %><%= category ? '&category=' + encodeURIComponent(category) : '' %><%= search ? '&search=' + encodeURIComponent(search) : '' %>" 
+             class="page-number <%= p === currentPage ? 'active' : '' %>">
+            <%= p %>
+          </a>
+        <% } %>
+      </div>
+    <% } %>
+  <% } %>
+</div>
+
+<%- include("../../partials/admin-footer") %>

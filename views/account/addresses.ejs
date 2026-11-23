@@ -1,0 +1,136 @@
+<%- include("../partials/header", { title: "Delivery Addresses" }) %>
+
+<section class="container addresses-page">
+  <div class="page-header-row">
+    <div>
+      <span class="eyebrow">DESTINATIONS</span>
+      <h1>Delivery Addresses</h1>
+      <p>Manage the shipping destinations for your orders.</p>
+    </div>
+    <a href="/account" class="btn-secondary btn-sm">← Back to Dashboard</a>
+  </div>
+
+  <!-- Security Lab Notice for IDOR -->
+  <div class="lab-instruction-box">
+    <div class="lab-instruction-header">
+      <span class="badge-lab">SECURITY LAB NOTICE</span>
+      <strong>Insecure Direct Object Reference (IDOR) on Addresses</strong>
+    </div>
+    <p>
+      The <strong>Delete (Insecure Mode)</strong> button sends a POST request to <code>/account/addresses/:id/delete-insecure</code> which deletes the record without verifying that <code>address.user_id === req.user.id</code>. Test by deleting an address created by another user account!
+    </p>
+    <p>
+      The standard <strong>Delete</strong> button posts to <code>/account/addresses/:id/delete</code>, enforcing ownership checks.
+    </p>
+  </div>
+
+  <div class="addresses-layout-grid">
+    <!-- Saved Addresses List -->
+    <div class="saved-addresses-col">
+      <h3>Saved Locations (<%= addresses.length %>)</h3>
+
+      <% if (!addresses || addresses.length === 0) { %>
+        <div class="empty-page-card" style="padding: 30px;">
+          <p>You have no saved delivery addresses yet. Add one using the form on the right.</p>
+        </div>
+      <% } else { %>
+        <div class="addresses-cards-stack">
+          <% addresses.forEach(addr => { %>
+            <div class="address-item-card <%= addr.is_default ? 'is-default-card' : '' %>">
+              <div class="addr-card-top">
+                <div class="addr-title-group">
+                  <strong><%= addr.full_name %></strong>
+                  <% if (addr.is_default) { %>
+                    <span class="status-badge status-delivered">Default Shipping</span>
+                  <% } %>
+                </div>
+                <small class="text-muted">ID: <code><%= addr.id %></code></small>
+              </div>
+
+              <div class="addr-card-body">
+                <p><%= addr.street_address %></p>
+                <p><%= addr.city %>, <%= addr.state %> <%= addr.postal_code || '' %></p>
+                <p><%= addr.country %></p>
+                <small>Phone: <%= addr.phone || 'N/A' %></small>
+              </div>
+
+              <div class="addr-card-actions">
+                <% if (!addr.is_default) { %>
+                  <form action="/account/addresses/<%= addr.id %>/default" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-secondary btn-xs">Set as Default</button>
+                  </form>
+                <% } %>
+
+                <!-- Secure Delete Form -->
+                <form action="/account/addresses/<%= addr.id %>/delete" method="POST" onsubmit="return confirm('Delete this address?')" style="display:inline;">
+                  <button type="submit" class="btn-text-danger btn-xs">Delete (Secure)</button>
+                </form>
+
+                <!-- Insecure IDOR Lab Delete Form -->
+                <form action="/account/addresses/<%= addr.id %>/delete-insecure" method="POST" onsubmit="return confirm('Trigger Insecure IDOR Deletion test on this address?')" style="display:inline;">
+                  <button type="submit" class="btn-text-danger btn-xs" style="color: #ea580c;" title="Deletes without user ownership validation">IDOR Delete Lab</button>
+                </form>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Add New Address Form -->
+    <div class="new-address-col">
+      <div class="profile-form-card">
+        <h3>Add New Address</h3>
+        <p class="card-desc">Enter your recipient details and physical delivery address.</p>
+
+        <form action="/account/addresses/add" method="POST" class="standard-form">
+          <div class="form-group">
+            <label for="fullName">Recipient Full Name</label>
+            <input type="text" id="fullName" name="full_name" placeholder="Alex Johnson" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="+234 801 234 5678" class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label for="street">Street Address</label>
+            <textarea id="street" name="street_address" rows="2" placeholder="Suite, Flat, Street address..." class="form-textarea" required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">City</label>
+              <input type="text" id="city" name="city" placeholder="Lagos / Abuja" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="state">State</label>
+              <input type="text" id="state" name="state" placeholder="Lagos" class="form-input" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="postal">Postal Code</label>
+              <input type="text" id="postal" name="postal_code" placeholder="100001" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="country">Country</label>
+              <input type="text" id="country" name="country" value="Nigeria" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-checkbox-row">
+            <input type="checkbox" id="isDefault" name="is_default" value="true">
+            <label for="isDefault">Set as my default shipping address</label>
+          </div>
+
+          <button type="submit" class="btn-primary">Save Delivery Address</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include("../partials/footer") %>

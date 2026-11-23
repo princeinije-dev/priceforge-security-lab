@@ -1,0 +1,68 @@
+<%- include("../../partials/admin-header", { title: "Customer Reviews" }) %>
+
+<div class="admin-page-header">
+  <div>
+    <span class="eyebrow">FEEDBACK MODERATION</span>
+    <h1>Customer Reviews (<%= reviews.length %>)</h1>
+    <p>Monitor community product evaluations and moderate abusive or spam content.</p>
+  </div>
+</div>
+
+<div class="panel-card">
+  <% if (!reviews || reviews.length === 0) { %>
+    <div class="panel-empty-state">
+      <p>No customer reviews recorded in the platform yet.</p>
+    </div>
+  <% } else { %>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Reviewer</th>
+          <th>Rating</th>
+          <th>Review Details</th>
+          <th>Date</th>
+          <th class="text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% reviews.forEach(rev => { %>
+          <tr>
+            <td>
+              <strong><a href="/products/<%= rev.product_id %>" target="_blank"><%= rev.product_name %></a></strong>
+            </td>
+            <td>
+              <div>
+                <strong><%= rev.reviewer_name %></strong>
+                <small class="text-muted d-block"><%= rev.reviewer_email %></small>
+              </div>
+            </td>
+            <td>
+              <div class="stars-gold">
+                <% for (let i = 1; i <= 5; i++) { %>
+                  <span class="<%= i <= rev.rating ? 'star-filled' : 'star-empty' %>">★</span>
+                <% } %>
+              </div>
+            </td>
+            <td style="max-width: 320px;">
+              <% if (rev.title) { %>
+                <strong style="display: block; font-size: 13px;"><%= rev.title %></strong>
+              <% } %>
+              <div style="font-size: 12px; color: #475569; word-break: break-word;">
+                <%- rev.comment %>
+              </div>
+            </td>
+            <td><%= new Date(rev.created_at).toLocaleDateString("en-NG") %></td>
+            <td class="text-right">
+              <form action="/admin/reviews/<%= rev.id %>/delete" method="POST" onsubmit="return confirm('Remove this review from the public storefront?')" style="display:inline;">
+                <button type="submit" class="btn-text-danger btn-xs">Remove</button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<%- include("../../partials/admin-footer") %>

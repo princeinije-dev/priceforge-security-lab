@@ -1,0 +1,19 @@
+<%- include("../partials/header", { title: "403 Forbidden" }) %>
+
+<section class="container error-page">
+  <div class="error-card">
+    <div class="error-code error-code-forbidden">403</div>
+    <h1>Access Forbidden</h1>
+    <p><%= typeof message !== "undefined" ? message : "You do not have permission to view or manage this administrative resource." %></p>
+    <div class="error-actions">
+      <a href="/products" class="btn-primary">Return to Shop →</a>
+      <% if (locals.user && locals.user.role === 'customer') { %>
+        <a href="/account" class="btn-secondary">My Customer Account</a>
+      <% } else { %>
+        <a href="/auth/login" class="btn-secondary">Sign In as Admin</a>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<%- include("../partials/footer") %>

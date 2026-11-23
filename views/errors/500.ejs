@@ -1,0 +1,21 @@
+<%- include("../partials/header", { title: "500 Internal Server Error" }) %>
+
+<section class="container error-page">
+  <div class="error-card">
+    <div class="error-code error-code-server">500</div>
+    <h1>System Error</h1>
+    <p><%= typeof message !== "undefined" ? message : "An internal server error occurred while processing your request." %></p>
+    <% if (typeof errorDetail !== "undefined" && errorDetail) { %>
+      <div class="error-debug-box">
+        <strong>Lab Debug Stack:</strong>
+        <pre><%= errorDetail %></pre>
+      </div>
+    <% } %>
+    <div class="error-actions">
+      <a href="/products" class="btn-primary">Return to Shop →</a>
+      <a href="javascript:history.back()" class="btn-secondary">Go Back</a>
+    </div>
+  </div>
+</section>
+
+<%- include("../partials/footer") %>

@@ -1,0 +1,149 @@
+<%- include("../partials/header", { title: "Order Details" }) %>
+
+<section class="container order-detail-page">
+  <div class="page-header-row">
+    <div>
+      <a href="/orders" class="auth-back-link">← Back to My Orders</a>
+      <h1>Order #<%= order.id %></h1>
+      <p class="order-full-id">Sequential Order ID: <code><%= order.id %></code></p>
+    </div>
+    <div class="header-action-group">
+      <a href="/orders/<%= order.id %>/invoice" target="_blank" class="btn-secondary btn-sm">Print Invoice ↗</a>
+      <% if (order.status === 'Pending' || order.status === 'Processing') { %>
+        <form action="/orders/<%= order.id %>/cancel" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order? Items will be returned to store stock.')" style="display:inline;">
+          <button type="submit" class="btn-text-danger btn-sm">Cancel Order</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Status Progress Bar -->
+  <div class="order-tracker-card">
+    <div class="tracker-steps">
+      <% const steps = ['Pending', 'Processing', 'Shipped', 'Delivered']; %>
+      <% const currentIdx = steps.indexOf(order.status); %>
+      <% steps.forEach((step, idx) => { %>
+        <div class="tracker-step <%= order.status === 'Cancelled' ? 'cancelled' : (idx <= currentIdx ? 'completed' : '') %>">
+          <div class="step-circle"><%= idx <= currentIdx ? '✓' : idx + 1 %></div>
+          <span class="step-title"><%= step %></span>
+        </div>
+      <% }); %>
+      <% if (order.status === 'Cancelled') { %>
+        <div class="tracker-step cancelled">
+          <div class="step-circle">✕</div>
+          <span class="step-title">Cancelled</span>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Lab Notice for IDOR -->
+  <div class="lab-instruction-box">
+    <div class="lab-instruction-header">
+      <span class="badge-lab">SECURITY LAB NOTICE</span>
+      <strong>Insecure Direct Object Reference (IDOR) with Sequential Integer IDs</strong>
+    </div>
+    <p>
+      This route (<code>/orders/<%= order.id %></code>) fetches the order solely by its sequential integer ID without checking if <code>order.user_id === req.user.id</code>. Because IDs are predictable sequential integers (e.g. 1, 2, 3...), you can test this by substituting another integer to access unauthorized customer orders.
+    </p>
+    <p>
+      The secure counterpart is located at <code><a href="/orders/secure/<%= order.id %>">/orders/secure/<%= order.id %></a></code>, which strictly enforces ownership and returns 404 for unauthorized IDs.
+    </p>
+  </div>
+
+  <div class="order-detail-grid">
+    <!-- Left: Items list -->
+    <div class="order-items-col">
+      <div class="detail-panel-card">
+        <h3>Purchased Items (<%= items.length %>)</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Unit Price</th>
+              <th>Quantity</th>
+              <th class="text-right">Line Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% items.forEach(item => { %>
+              <tr>
+                <td>
+                  <div class="table-product-cell">
+                    <a href="/products/<%= item.product_id %>" class="table-product-thumb">
+                      <% if (item.image_url) { %>
+                        <img src="<%= item.image_url %>" alt="<%= item.product_name %>">
+                      <% } else { %>
+                        <div class="table-thumb-placeholder">TECH</div>
+                      <% } %>
+                    </a>
+                    <div>
+                      <strong><a href="/products/<%= item.product_id %>"><%= item.product_name %></a></strong>
+                    </div>
+                  </div>
+                </td>
+                <td>₦<%= Number(item.unit_price).toLocaleString("en-NG") %></td>
+                <td><%= item.quantity %></td>
+                <td class="text-right"><strong>₦<%= Number(item.subtotal).toLocaleString("en-NG") %></strong></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right: Shipping & Pricing Summary -->
+    <div class="order-meta-col">
+      <div class="detail-panel-card">
+        <h3>Order Summary</h3>
+        <div class="summary-line-item">
+          <span>Date Placed</span>
+          <span><%= new Date(order.created_at).toLocaleString("en-NG") %></span>
+        </div>
+        <div class="summary-line-item">
+          <span>Order Status</span>
+          <span class="status-badge status-<%= order.status.toLowerCase() %>"><%= order.status %></span>
+        </div>
+        <div class="summary-line-item">
+          <span>Customer</span>
+          <span><%= order.user_name || 'Customer' %> (<%= order.user_email %>)</span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-line-item">
+          <span>Subtotal</span>
+          <span>₦<%= Number(order.subtotal_amount || order.total_amount).toLocaleString("en-NG") %></span>
+        </div>
+
+        <% if (order.discount_amount > 0) { %>
+          <div class="summary-line-item text-success">
+            <span>Coupon (<%= order.coupon_code || 'PROMO' %>)</span>
+            <span>-₦<%= Number(order.discount_amount).toLocaleString("en-NG") %></span>
+          </div>
+        <% } %>
+
+        <div class="summary-line-item">
+          <span>Shipping</span>
+          <span class="text-free">FREE</span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-total-item">
+          <strong>Total Paid</strong>
+          <strong class="total-highlight">₦<%= Number(order.total_amount).toLocaleString("en-NG") %></strong>
+        </div>
+      </div>
+
+      <div class="detail-panel-card" style="margin-top: 20px;">
+        <h3>Shipping Destination</h3>
+        <p class="shipping-address-display">
+          <%= order.shipping_address_text || 'Standard delivery address on file' %>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include("../partials/footer") %>

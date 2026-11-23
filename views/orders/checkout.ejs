@@ -1,0 +1,243 @@
+<%- include("../partials/header", { title: "Complete Checkout" }) %>
+
+<section class="container checkout-section">
+  <div class="page-header-row">
+    <div>
+      <span class="eyebrow">FINAL STEP</span>
+      <h1>Order Checkout</h1>
+      <p>Confirm your delivery address, apply discounts, and complete your purchase.</p>
+    </div>
+    <a href="/cart" class="btn-secondary btn-sm">← Return to Cart</a>
+  </div>
+
+  <div class="checkout-grid-layout">
+    <!-- Left Column: Shipping & Order Review -->
+    <div class="checkout-main-col">
+      <!-- Address Selection Box -->
+      <div class="checkout-card">
+        <div class="checkout-card-header">
+          <span class="step-num">1</span>
+          <div>
+            <h3>Delivery Address</h3>
+            <p>Select where you want your hardware delivered.</p>
+          </div>
+        </div>
+
+        <div class="address-options-list">
+          <% if (addresses && addresses.length > 0) { %>
+            <% addresses.forEach((addr, idx) => { %>
+              <label class="address-option-label">
+                <input 
+                  type="radio" 
+                  name="selected_address_radio" 
+                  value="<%= addr.id %>" 
+                  <%= addr.is_default || idx === 0 ? 'checked' : '' %>
+                  onchange="document.getElementById('checkoutAddressId').value = this.value; document.getElementById('checkoutAddressIdSecure').value = this.value;"
+                >
+                <div class="address-option-card">
+                  <div class="addr-top">
+                    <strong><%= addr.full_name %></strong>
+                    <% if (addr.is_default) { %><span class="status-badge status-delivered">Default</span><% } %>
+                  </div>
+                  <p><%= addr.street_address %>, <%= addr.city %>, <%= addr.state %> <%= addr.postal_code || '' %></p>
+                  <small>Phone: <%= addr.phone || 'N/A' %></small>
+                </div>
+              </label>
+            <% }); %>
+          <% } %>
+
+          <!-- Manual / Inline address toggle -->
+          <div class="inline-address-box">
+            <details>
+              <summary class="toggle-link">+ Enter or use an alternate delivery address</summary>
+              <div class="inline-addr-fields">
+                <textarea 
+                  name="manual_address_text" 
+                  id="manualAddressInput" 
+                  rows="2" 
+                  placeholder="Recipient Name, Street, City, State, Phone number" 
+                  class="form-textarea"
+                  oninput="document.getElementById('checkoutInlineAddr').value = this.value; document.getElementById('checkoutInlineAddrSecure').value = this.value;"
+                ></textarea>
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Review Box -->
+      <div class="checkout-card">
+        <div class="checkout-card-header">
+          <span class="step-num">2</span>
+          <div>
+            <h3>Order Review</h3>
+            <p><%= cart.length %> <%= cart.length === 1 ? 'item' : 'items' %> in your package</p>
+          </div>
+        </div>
+
+        <div class="checkout-items-list">
+          <% cart.forEach(item => { %>
+            <div class="checkout-item-row">
+              <div class="checkout-item-media">
+                <% if (item.image_url) { %>
+                  <img src="<%= item.image_url %>" alt="<%= item.name %>">
+                <% } else { %>
+                  <div class="checkout-item-placeholder">TECH</div>
+                <% } %>
+                <span class="checkout-qty-tag"><%= item.quantity %></span>
+              </div>
+              <div class="checkout-item-info">
+                <strong><%= item.name %></strong>
+                <small class="text-muted"><%= item.category || 'Gear' %></small>
+              </div>
+              <div class="checkout-item-price">
+                <strong>₦<%= (Number(item.price) * item.quantity).toLocaleString("en-NG") %></strong>
+                <small>₦<%= Number(item.price).toLocaleString("en-NG") %> each</small>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- Security Lab Explanatory Box -->
+      <div class="lab-instruction-box">
+        <div class="lab-instruction-header">
+          <span class="badge-lab">SECURITY LAB NOTICE</span>
+          <strong>Intentional Price Manipulation Vulnerability</strong>
+        </div>
+        <p>
+          The standard checkout form below submits hidden fields containing item prices. An authorized penetration tester can intercept this request in an HTTP proxy (e.g. Burp Suite / OWASP ZAP) or edit the hidden field in the DOM to test if the backend trusts client-supplied prices.
+        </p>
+        <p>
+          A separate <strong>Secure Checkout Mode</strong> button is also provided for comparison testing, which reads prices strictly from the server database.
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Column: Coupons & Total Summary -->
+    <div class="checkout-side-col">
+      <!-- Coupon Application Box -->
+      <div class="summary-card coupon-box">
+        <span class="eyebrow">DISCOUNT CODE</span>
+        <h3>Have a Coupon?</h3>
+        <p class="coupon-hint">Try testing with <strong>FORGE10</strong> (10% off) or <strong>FLAT5000</strong> (₦5,000 off).</p>
+
+        <div class="coupon-input-group">
+          <input type="text" id="couponCodeInput" placeholder="Enter coupon code" class="form-input coupon-field">
+          <button type="button" id="applyCouponBtn" class="btn-secondary">Apply</button>
+        </div>
+        <div id="couponMessage" class="coupon-msg-box"></div>
+      </div>
+
+      <!-- Order Summary Aside -->
+      <div class="summary-card">
+        <span class="eyebrow">PAYMENT SUMMARY</span>
+        <h3>Order Total</h3>
+
+        <div class="summary-line-item">
+          <span>Subtotal</span>
+          <span id="summarySubtotal" data-subtotal="<%= subtotal %>">₦<%= Number(subtotal).toLocaleString("en-NG") %></span>
+        </div>
+
+        <div class="summary-line-item" id="discountLineItem" style="display: none;">
+          <span class="text-success">Discount (<span id="discountCodeLabel"></span>)</span>
+          <span class="text-success" id="discountAmountLabel">-₦0.00</span>
+        </div>
+
+        <div class="summary-line-item">
+          <span>Delivery Shipping</span>
+          <span class="text-free">FREE</span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-total-item">
+          <strong>Final Payable</strong>
+          <strong class="total-highlight" id="finalTotalLabel">₦<%= Number(subtotal).toLocaleString("en-NG") %></strong>
+        </div>
+
+        <!-- 1. VULNERABLE CHECKOUT FORM (Accepts submitted price) -->
+        <form action="/orders/checkout" method="POST" id="vulnerableCheckoutForm">
+          <% cart.forEach((item, index) => { %>
+            <input type="hidden" name="items[<%= index %>][productId]" value="<%= item.product_id %>">
+            <input type="hidden" name="items[<%= index %>][quantity]" value="<%= item.quantity %>">
+            <!-- INTENTIONAL LAB VULNERABILITY: Client-side controlled price field -->
+            <input type="hidden" name="items[<%= index %>][price]" value="<%= item.price %>" class="lab-price-input">
+          <% }); %>
+
+          <input type="hidden" name="address_id" id="checkoutAddressId" value="<%= addresses && addresses.length > 0 ? addresses[0].id : '' %>">
+          <input type="hidden" name="inline_address" id="checkoutInlineAddr" value="">
+          <input type="hidden" name="coupon_code" id="checkoutCouponCode" value="">
+
+          <button type="submit" class="btn-primary btn-checkout-proceed">
+            Place Order (Vulnerable Mode) →
+          </button>
+        </form>
+
+        <!-- 2. SECURE CHECKOUT FORM (Enforces database price) -->
+        <form action="/orders/checkout-secure" method="POST" id="secureCheckoutForm" style="margin-top: 12px;">
+          <input type="hidden" name="address_id" id="checkoutAddressIdSecure" value="<%= addresses && addresses.length > 0 ? addresses[0].id : '' %>">
+          <input type="hidden" name="inline_address" id="checkoutInlineAddrSecure" value="">
+          <input type="hidden" name="coupon_code" id="checkoutCouponCodeSecure" value="">
+
+          <button type="submit" class="btn-secondary btn-full-width">
+            Place Order (Secure Mode) 🔒
+          </button>
+        </form>
+
+        <p class="secure-badge-note">
+          🔒 By placing your order, you agree to PriceForge terms of service and simulated warranty conditions.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const applyBtn = document.getElementById("applyCouponBtn");
+  const codeInput = document.getElementById("couponCodeInput");
+  const msgBox = document.getElementById("couponMessage");
+  const subtotalEl = document.getElementById("summarySubtotal");
+  const subtotalVal = Number(subtotalEl.getAttribute("data-subtotal")) || 0;
+
+  applyBtn.addEventListener("click", async function() {
+    const code = codeInput.value.trim();
+    if (!code) {
+      msgBox.className = "coupon-msg-box error";
+      msgBox.innerText = "Please enter a coupon code.";
+      return;
+    }
+
+    try {
+      const res = await fetch("/orders/api/apply-coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, subtotal: subtotalVal })
+      });
+      const data = await res.json();
+
+      if (data.valid) {
+        msgBox.className = "coupon-msg-box success";
+        msgBox.innerText = `Coupon ${data.coupon.code} applied! Saved ₦${data.discount.toLocaleString("en-NG")}`;
+        
+        document.getElementById("discountLineItem").style.display = "flex";
+        document.getElementById("discountCodeLabel").innerText = data.coupon.code;
+        document.getElementById("discountAmountLabel").innerText = `-₦${data.discount.toLocaleString("en-NG")}`;
+        document.getElementById("finalTotalLabel").innerText = `₦${data.newTotal.toLocaleString("en-NG")}`;
+        
+        document.getElementById("checkoutCouponCode").value = data.coupon.code;
+        document.getElementById("checkoutCouponCodeSecure").value = data.coupon.code;
+      } else {
+        msgBox.className = "coupon-msg-box error";
+        msgBox.innerText = data.message || "Invalid coupon code.";
+      }
+    } catch (err) {
+      msgBox.className = "coupon-msg-box error";
+      msgBox.innerText = "Failed to validate coupon.";
+    }
+  });
+});
+</script>
+
+<%- include("../partials/footer") %>

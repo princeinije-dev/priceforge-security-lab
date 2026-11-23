@@ -1,0 +1,61 @@
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand-col">
+        <a href="/products" class="brand brand-light">
+          <span class="brand-mark">P</span>
+          <span>priceforge<span class="brand-dot">.</span></span>
+        </a>
+        <p class="footer-desc">
+          High-performance electronics, precision audio equipment, and creator connectivity tools designed for modern workflows.
+        </p>
+        <div class="lab-disclaimer">
+          <span class="badge-lab">SECURITY LAB INSTANCE</span>
+          <p>Configured for local vulnerability research and authorized security evaluation.</p>
+        </div>
+      </div>
+
+      <div class="footer-links-col">
+        <h4>Catalog</h4>
+        <a href="/products">All Electronics</a>
+        <a href="/products?category=Audio">Studio Audio</a>
+        <a href="/products?category=Gaming">Gaming Gear</a>
+        <a href="/products?category=Connectivity">Connectivity & Docks</a>
+        <a href="/products?category=Accessories">Workspace Accessories</a>
+      </div>
+
+      <div class="footer-links-col">
+        <h4>Customer Care</h4>
+        <a href="/orders">Track My Orders</a>
+        <a href="/account">Account Settings</a>
+        <a href="/cart">Shopping Cart</a>
+        <a href="/wishlist">Saved Wishlist</a>
+      </div>
+
+      <div class="footer-links-col">
+        <h4>Security Lab Endpoints</h4>
+        <a href="/products/search/vulnerable">SQL Injection Search</a>
+        <a href="/admin/api/unprotected-stats">Broken Access Control API</a>
+        <a href="/auth/forgot-password">Token Leakage Password Reset</a>
+        <a href="/orders/checkout">Client Price Manipulation</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="copyright">
+        © <%= new Date().getFullYear() %> PriceForge Inc. Built for engineering and cybersecurity education.
+      </p>
+      <div class="footer-meta-links">
+        <span>Localhost Environment</span>
+        <span>PostgreSQL 16</span>
+        <span>Express MVC</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<%- include("../partials/header", { title: "Create Your Account" }) %>
+
+<section class="auth-page">
+  <div class="auth-image">
+    <div>
+      <span class="eyebrow eyebrow-light">JOIN PRICEFORGE</span>
+      <h1>Engineered for sound,<br>speed & accuracy.</h1>
+      <p>Create your customer account to save wishlists, manage multi-location shipping, and track tech deliveries.</p>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-form-container">
+      <form class="auth-form" action="/auth/register" method="POST">
+        <a href="/products" class="auth-back-link">← Back to shop</a>
+        <span class="eyebrow">CUSTOMER ONBOARDING</span>
+        <h2>Create an account</h2>
+        <p class="auth-subtitle">Get started with your PriceForge profile.</p>
+
+        <div class="form-group">
+          <label for="regName">Full Name</label>
+          <input 
+            type="text" 
+            id="regName" 
+            name="name" 
+            placeholder="Alex Johnson" 
+            value="<%= typeof formData !== 'undefined' && formData.name ? formData.name : '' %>"
+            class="form-input" 
+            required 
+            autocomplete="name"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="regEmail">Email address</label>
+          <input 
+            type="email" 
+            id="regEmail" 
+            name="email" 
+            placeholder="you@example.com" 
+            value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>"
+            class="form-input" 
+            required 
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="regPassword">Password</label>
+          <input 
+            type="password" 
+            id="regPassword" 
+            name="password" 
+            placeholder="Minimum 8 characters" 
+            class="form-input" 
+            minlength="8" 
+            required 
+            autocomplete="new-password"
+          >
+          <small class="form-hint">Must contain at least 8 characters</small>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full-width">
+          Create Account <span>→</span>
+        </button>
+
+        <p class="auth-switch-text">
+          Already have an account? <a href="/auth/login">Sign in</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<%- include("../partials/footer") %>

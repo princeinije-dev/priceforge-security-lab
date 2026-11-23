@@ -1,0 +1,96 @@
+<%- include("../../partials/admin-header", { title: `Customer: ${customer.name}` }) %>
+
+<div class="admin-page-header">
+  <div>
+    <a href="/admin/customers" class="btn-text-muted btn-sm">← Back to Customer Directory</a>
+    <h1>Customer: <%= customer.name %></h1>
+    <p><%= customer.email %> • Joined <%= new Date(customer.created_at).toLocaleDateString("en-NG", { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+  </div>
+</div>
+
+<div class="admin-customer-details-grid">
+  <!-- Left Column: Role Management & Profile -->
+  <div class="customer-profile-col">
+    <div class="panel-card" style="margin-bottom: 24px;">
+      <h3>Account Details & Role</h3>
+      <div class="customer-info-box">
+        <div class="form-group">
+          <label>UUID Reference</label>
+          <input type="text" value="<%= customer.id %>" class="form-input" disabled style="background:#f8fafc;">
+        </div>
+
+        <form action="/admin/customers/<%= customer.id %>/role" method="POST" style="margin-top: 16px;">
+          <div class="form-group">
+            <label for="userRoleSelect">Assigned Role Privilege</label>
+            <select name="role" id="userRoleSelect" class="form-select">
+              <option value="customer" <%= customer.role === 'customer' ? 'selected' : '' %>>customer (Standard User)</option>
+              <option value="admin" <%= customer.role === 'admin' ? 'selected' : '' %>>admin (Full Administrative Access)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-primary btn-sm">Update Privilege Role</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Saved Addresses -->
+    <div class="panel-card">
+      <h3>Saved Shipping Addresses (<%= addresses ? addresses.length : 0 %>)</h3>
+      <% if (!addresses || addresses.length === 0) { %>
+        <p class="text-muted" style="padding: 12px 0;">No delivery addresses saved for this customer.</p>
+      <% } else { %>
+        <div class="addresses-cards-stack">
+          <% addresses.forEach(addr => { %>
+            <div class="address-item-card">
+              <div class="addr-card-top">
+                <strong><%= addr.full_name %></strong>
+                <% if (addr.is_default) { %><span class="status-badge status-delivered">Default</span><% } %>
+              </div>
+              <p style="margin: 4px 0;"><%= addr.street_address %></p>
+              <p style="margin: 0;"><%= addr.city %>, <%= addr.state %> <%= addr.postal_code || '' %></p>
+              <small class="text-muted">Phone: <%= addr.phone || 'N/A' %></small>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Right Column: Order History -->
+  <div class="customer-orders-col">
+    <div class="panel-card">
+      <h3>Purchase Order History (<%= orders ? orders.length : 0 %>)</h3>
+      <% if (!orders || orders.length === 0) { %>
+        <div class="panel-empty-state">
+          <p>No orders placed by this customer yet.</p>
+        </div>
+      <% } else { %>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Order Ref</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% orders.forEach(ord => { %>
+              <tr>
+                <td><strong>#<%= ord.id %></strong></td>
+                <td><%= new Date(ord.created_at).toLocaleDateString("en-NG") %></td>
+                <td><strong>₦<%= Number(ord.total_amount).toLocaleString("en-NG") %></strong></td>
+                <td><span class="status-badge status-<%= ord.status.toLowerCase() %>"><%= ord.status %></span></td>
+                <td class="text-right">
+                  <a href="/admin/orders/<%= ord.id %>" class="btn-secondary btn-xs">Manage</a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include("../../partials/admin-footer") %>

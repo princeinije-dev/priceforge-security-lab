@@ -1,0 +1,69 @@
+<%- include("../../partials/admin-header", { title: "Order Management" }) %>
+
+<div class="admin-page-header">
+  <div>
+    <span class="eyebrow">FULFILLMENT PIPELINE</span>
+    <h1>Customer Orders (<%= orders.length %>)</h1>
+    <p>Track order dispatch, inspect shipping manifests, and manage delivery statuses.</p>
+  </div>
+</div>
+
+<div class="admin-filter-bar">
+  <div class="category-tabs">
+    <a href="/admin/orders" class="category-tab <%= currentStatus === 'all' ? 'active' : '' %>">All Statuses</a>
+    <a href="/admin/orders?status=Pending" class="category-tab <%= currentStatus === 'Pending' ? 'active' : '' %>">Pending</a>
+    <a href="/admin/orders?status=Processing" class="category-tab <%= currentStatus === 'Processing' ? 'active' : '' %>">Processing</a>
+    <a href="/admin/orders?status=Shipped" class="category-tab <%= currentStatus === 'Shipped' ? 'active' : '' %>">Shipped</a>
+    <a href="/admin/orders?status=Delivered" class="category-tab <%= currentStatus === 'Delivered' ? 'active' : '' %>">Delivered</a>
+    <a href="/admin/orders?status=Cancelled" class="category-tab <%= currentStatus === 'Cancelled' ? 'active' : '' %>">Cancelled</a>
+  </div>
+</div>
+
+<div class="panel-card">
+  <% if (!orders || orders.length === 0) { %>
+    <div class="panel-empty-state">
+      <p>No orders found matching the selected status filter.</p>
+      <a href="/admin/orders" class="btn-secondary btn-sm">Reset Filter</a>
+    </div>
+  <% } else { %>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order Ref</th>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach(ord => { %>
+          <tr>
+            <td>
+              <strong>#<%= ord.id %></strong>
+            </td>
+            <td>
+              <div>
+                <strong><%= ord.user_name %></strong>
+                <small class="text-muted d-block"><%= ord.user_email %></small>
+              </div>
+            </td>
+            <td><%= new Date(ord.created_at).toLocaleString("en-NG") %></td>
+            <td><%= ord.item_count || 1 %> <%= ord.item_count === 1 ? 'item' : 'items' %></td>
+            <td><strong>₦<%= Number(ord.total_amount).toLocaleString("en-NG") %></strong></td>
+            <td>
+              <span class="status-badge status-<%= ord.status.toLowerCase() %>"><%= ord.status %></span>
+            </td>
+            <td class="text-right">
+              <a href="/admin/orders/<%= ord.id %>" class="btn-secondary btn-xs">Manage Fulfillment →</a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<%- include("../../partials/admin-footer") %>

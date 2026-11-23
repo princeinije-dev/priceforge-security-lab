@@ -1,0 +1,80 @@
+<%- include("../partials/header", { title: "My Saved Wishlist" }) %>
+
+<section class="container wishlist-page">
+  <div class="page-header-row">
+    <div>
+      <span class="eyebrow">SAVED HARDWARE</span>
+      <h1>My Wishlist</h1>
+      <p>Keep track of devices and gear you want to purchase later.</p>
+    </div>
+    <a href="/products" class="btn-secondary btn-sm">Continue Shopping →</a>
+  </div>
+
+  <% if (!items || items.length === 0) { %>
+    <div class="empty-page-card">
+      <div class="empty-page-icon">♡</div>
+      <h2>Your wishlist is empty</h2>
+      <p>Browse our electronics catalog and tap the heart icon to save items here.</p>
+      <a href="/products" class="btn-primary">Explore Products →</a>
+    </div>
+  <% } else { %>
+    <div class="wishlist-table-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Unit Price</th>
+            <th>Stock Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% items.forEach(item => { %>
+            <tr>
+              <td>
+                <div class="table-product-cell">
+                  <a href="/products/<%= item.id %>" class="table-product-thumb">
+                    <% if (item.image_url) { %>
+                      <img src="<%= item.image_url %>" alt="<%= item.name %>">
+                    <% } else { %>
+                      <div class="table-thumb-placeholder">TECH</div>
+                    <% } %>
+                  </a>
+                  <div>
+                    <strong><a href="/products/<%= item.id %>"><%= item.name %></a></strong>
+                    <small class="text-muted">Added <%= new Date(item.added_at).toLocaleDateString("en-NG") %></small>
+                  </div>
+                </div>
+              </td>
+              <td><span class="category-pill-sm"><%= item.category %></span></td>
+              <td><strong>₦<%= Number(item.price).toLocaleString("en-NG") %></strong></td>
+              <td>
+                <% if (item.stock > 0) { %>
+                  <span class="status-badge status-delivered">In Stock (<%= item.stock %>)</span>
+                <% } else { %>
+                  <span class="status-badge status-cancelled">Out of Stock</span>
+                <% } %>
+              </td>
+              <td class="text-right">
+                <div class="table-actions-inline">
+                  <% if (item.stock > 0) { %>
+                    <form action="/wishlist/move-to-cart" method="POST" style="display:inline;">
+                      <input type="hidden" name="productId" value="<%= item.id %>">
+                      <button type="submit" class="btn-primary btn-sm">Move to Cart</button>
+                    </form>
+                  <% } %>
+                  <form action="/wishlist/<%= item.id %>/remove" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-text-danger btn-sm" title="Remove">Remove</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<%- include("../partials/footer") %>

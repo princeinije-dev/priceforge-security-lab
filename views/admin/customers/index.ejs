@@ -1,0 +1,56 @@
+<%- include("../../partials/admin-header", { title: "Customer Directory" }) %>
+
+<div class="admin-page-header">
+  <div>
+    <span class="eyebrow">USER ACCOUNTS</span>
+    <h1>Customer Directory (<%= users.length %>)</h1>
+    <p>Inspect registered customer profiles, purchase history, and access role tiers.</p>
+  </div>
+</div>
+
+<div class="panel-card">
+  <% if (!users || users.length === 0) { %>
+    <div class="panel-empty-state">
+      <p>No customer accounts found in the database.</p>
+    </div>
+  <% } else { %>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Account Role</th>
+          <th>Total Orders</th>
+          <th>Lifetime Spend</th>
+          <th>Joined Date</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(u => { %>
+          <tr>
+            <td>
+              <div class="table-user-cell">
+                <span class="user-avatar-initial sm"><%= u.name.charAt(0).toUpperCase() %></span>
+                <div>
+                  <strong><%= u.name %></strong>
+                  <small class="text-muted d-block"><%= u.email %></small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="role-badge role-<%= u.role %>"><%= u.role %></span>
+            </td>
+            <td><strong><%= u.order_count || 0 %></strong></td>
+            <td><strong>₦<%= Number(u.total_spent || 0).toLocaleString("en-NG") %></strong></td>
+            <td><%= new Date(u.created_at).toLocaleDateString("en-NG", { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+            <td class="text-right">
+              <a href="/admin/customers/<%= u.id %>" class="btn-secondary btn-xs">Manage User →</a>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<%- include("../../partials/admin-footer") %>

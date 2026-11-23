@@ -1,0 +1,135 @@
+<%- include("../../partials/admin-header", { title: `Manage Order #${order.id}` }) %>
+
+<div class="admin-page-header">
+  <div>
+    <a href="/admin/orders" class="btn-text-muted btn-sm">← Back to All Orders</a>
+    <h1>Order Fulfillment #<%= order.id %></h1>
+    <p>Placed on <%= new Date(order.created_at).toLocaleString("en-NG") %> • Order ID: <code>#<%= order.id %></code></p>
+  </div>
+  <div class="admin-header-actions">
+    <a href="/orders/<%= order.id %>/invoice" target="_blank" class="btn-secondary btn-sm">Print Invoice ↗</a>
+  </div>
+</div>
+
+<div class="admin-order-mgmt-grid">
+  <!-- Left Column: Status Update & Items -->
+  <div class="admin-order-main">
+    <!-- Status Controller Box -->
+    <div class="panel-card" style="margin-bottom: 24px;">
+      <div class="panel-header-row">
+        <div>
+          <h3>Fulfillment Status Control</h3>
+          <p class="text-muted">Current status: <span class="status-badge status-<%= order.status.toLowerCase() %>"><%= order.status %></span></p>
+        </div>
+      </div>
+
+      <form action="/admin/orders/<%= order.id %>/status" method="POST" class="order-status-update-form">
+        <div class="form-row" style="align-items: flex-end;">
+          <div class="form-group flex-2">
+            <label for="orderStatusSelect">Update Status To</label>
+            <select name="status" id="orderStatusSelect" class="form-select">
+              <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+              <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+              <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+              <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+              <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled (Restores Inventory)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn-primary">Update Status</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Items List -->
+    <div class="panel-card">
+      <h3>Manifest Items (<%= items.length %>)</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Hardware Item</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th class="text-right">Line Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% items.forEach(item => { %>
+            <tr>
+              <td>
+                <div class="table-product-cell">
+                  <div class="table-product-thumb">
+                    <% if (item.image_url) { %>
+                      <img src="<%= item.image_url %>" alt="<%= item.product_name %>">
+                    <% } else { %>
+                      <div class="table-thumb-placeholder">TECH</div>
+                    <% } %>
+                  </div>
+                  <div>
+                    <strong><%= item.product_name %></strong>
+                    <small class="text-muted d-block">SKU: <code><%= item.product_id %></code></small>
+                  </div>
+                </div>
+              </td>
+              <td>₦<%= Number(item.unit_price).toLocaleString("en-NG") %></td>
+              <td><strong><%= item.quantity %></strong></td>
+              <td class="text-right"><strong>₦<%= Number(item.subtotal).toLocaleString("en-NG") %></strong></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Right Column: Customer & Delivery Details -->
+  <div class="admin-order-aside">
+    <div class="panel-card" style="margin-bottom: 24px;">
+      <h3>Customer Account</h3>
+      <div class="customer-info-box">
+        <strong style="font-size: 16px;"><%= order.user_name %></strong>
+        <p style="margin: 4px 0;"><%= order.user_email %></p>
+        <small class="text-muted">Account UUID: <code><%= order.user_id %></code></small>
+        <div style="margin-top: 12px;">
+          <a href="/admin/customers/<%= order.user_id %>" class="btn-secondary btn-xs">View Customer Profile →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-card" style="margin-bottom: 24px;">
+      <h3>Shipping Destination</h3>
+      <p style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px;">
+        <%= order.shipping_address_text || 'Standard delivery address on file' %>
+      </p>
+    </div>
+
+    <div class="panel-card">
+      <h3>Financial Breakdown</h3>
+      <div class="summary-line-item">
+        <span>Items Subtotal</span>
+        <span>₦<%= Number(order.subtotal_amount || order.total_amount).toLocaleString("en-NG") %></span>
+      </div>
+
+      <% if (order.discount_amount > 0) { %>
+        <div class="summary-line-item text-success">
+          <span>Coupon Discount (<%= order.coupon_code || 'CODE' %>)</span>
+          <span>-₦<%= Number(order.discount_amount).toLocaleString("en-NG") %></span>
+        </div>
+      <% } %>
+
+      <div class="summary-line-item">
+        <span>Delivery Freight</span>
+        <span class="text-free">FREE</span>
+      </div>
+
+      <div class="summary-divider"></div>
+
+      <div class="summary-total-item">
+        <strong>Total Amount</strong>
+        <strong class="total-highlight">₦<%= Number(order.total_amount).toLocaleString("en-NG") %></strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include("../../partials/admin-footer") %>

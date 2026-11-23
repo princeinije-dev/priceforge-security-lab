@@ -1,0 +1,62 @@
+<%- include("../partials/header", { title: "Sign In" }) %>
+
+<section class="auth-page">
+  <div class="auth-image">
+    <div>
+      <span class="eyebrow eyebrow-light">WELCOME BACK</span>
+      <h1>Your next tech<br>upgrade starts here.</h1>
+      <p>Sign in to manage your orders, check shipment tracking, and access saved hardware.</p>
+      
+      <div class="auth-demo-accounts">
+        <span class="demo-title">Default Local Test Accounts:</span>
+        <div class="demo-acc-line">
+          <strong>Admin:</strong> <code>admin@priceforge.local</code> / <code>Admin123!</code>
+        </div>
+        <div class="demo-acc-line">
+          <strong>Customer:</strong> <code>alex@priceforge.local</code> / <code>Customer123!</code>
+        </div>
+        <div class="demo-acc-line">
+          <strong>Customer 2 (IDOR testing):</strong> <code>sam@priceforge.local</code> / <code>Customer123!</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-form-container">
+      <form class="auth-form" action="/auth/login" method="POST">
+        <a href="/products" class="auth-back-link">← Back to shop</a>
+        <span class="eyebrow">AUTHENTICATION</span>
+        <h2>Welcome back</h2>
+        <p class="auth-subtitle">Enter your email and password to access your account.</p>
+
+        <% if (typeof redirect !== "undefined" && redirect) { %>
+          <input type="hidden" name="redirect" value="<%= redirect %>">
+        <% } %>
+
+        <div class="form-group">
+          <label for="loginEmail">Email address</label>
+          <input type="email" id="loginEmail" name="email" placeholder="you@example.com" class="form-input" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <div class="label-with-link">
+            <label for="loginPassword">Password</label>
+            <a href="/auth/forgot-password" class="auth-forgot-link">Forgot password?</a>
+          </div>
+          <input type="password" id="loginPassword" name="password" placeholder="Enter your password" class="form-input" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn-primary btn-full-width">
+          Sign In <span>→</span>
+        </button>
+
+        <p class="auth-switch-text">
+          Don't have an account? <a href="/auth/register">Create one for free</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<%- include("../partials/footer") %>

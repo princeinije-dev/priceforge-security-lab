@@ -1,0 +1,125 @@
+<%- include("../../partials/admin-header", { title: "Discount Coupons" }) %>
+
+<div class="admin-page-header">
+  <div>
+    <span class="eyebrow">MARKETING & PROMOTIONS</span>
+    <h1>Coupons & Discounts (<%= coupons.length %>)</h1>
+    <p>Manage promotional discount codes, validity periods, and checkout usage restrictions.</p>
+  </div>
+</div>
+
+<div class="admin-coupons-grid">
+  <!-- Coupons Table -->
+  <div class="coupons-table-col">
+    <div class="panel-card">
+      <h3>Active Promo Codes</h3>
+      <% if (!coupons || coupons.length === 0) { %>
+        <div class="panel-empty-state">
+          <p>No coupons currently configured.</p>
+        </div>
+      <% } else { %>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Promo Code</th>
+              <th>Discount</th>
+              <th>Min Order</th>
+              <th>Usage Rate</th>
+              <th>Expires</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% coupons.forEach(c => { %>
+              <tr>
+                <td><strong><code><%= c.code %></code></strong></td>
+                <td>
+                  <% if (c.discount_type === 'percentage') { %>
+                    <strong><%= c.discount_value %>% OFF</strong>
+                  <% } else { %>
+                    <strong>₦<%= Number(c.discount_value).toLocaleString("en-NG") %> OFF</strong>
+                  <% } %>
+                </td>
+                <td>₦<%= Number(c.min_order_amount).toLocaleString("en-NG") %></td>
+                <td>
+                  <span><%= c.used_count %> / <%= c.max_uses || '∞' %></span>
+                </td>
+                <td>
+                  <% if (c.expires_at) { %>
+                    <% const isExp = new Date(c.expires_at) < new Date(); %>
+                    <span class="<%= isExp ? 'text-danger' : '' %>">
+                      <%= new Date(c.expires_at).toLocaleDateString("en-NG") %>
+                      <% if (isExp) { %>(Expired)<% } %>
+                    </span>
+                  <% } else { %>
+                    <span class="text-muted">No expiry</span>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="status-badge <%= c.is_active ? 'status-delivered' : 'status-cancelled' %>">
+                    <%= c.is_active ? 'Active' : 'Disabled' %>
+                  </span>
+                </td>
+                <td class="text-right">
+                  <form action="/admin/coupons/<%= c.id %>/delete" method="POST" onsubmit="return confirm('Delete coupon <%= c.code %>?')" style="display:inline;">
+                    <button type="submit" class="btn-text-danger btn-xs">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Create Coupon Form -->
+  <div class="create-coupon-col">
+    <div class="panel-card">
+      <h3>Create New Coupon</h3>
+      <p class="card-desc">Define a discount rule for customer checkouts.</p>
+
+      <form action="/admin/coupons/new" method="POST" class="standard-form">
+        <div class="form-group">
+          <label for="couponCode">Coupon Code (Uppercase)</label>
+          <input type="text" id="couponCode" name="code" placeholder="e.g. SUMMER25" class="form-input" style="text-transform:uppercase;" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="discountType">Discount Type</label>
+            <select id="discountType" name="discount_type" class="form-select" required>
+              <option value="percentage">Percentage (%)</option>
+              <option value="fixed">Fixed Amount (₦)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="discountValue">Discount Value</label>
+            <input type="number" step="0.01" id="discountValue" name="discount_value" placeholder="15 (for 15% or ₦15)" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="minOrder">Min Order Amount (₦)</label>
+            <input type="number" step="0.01" id="minOrder" name="min_order_amount" placeholder="0.00" value="0" class="form-input">
+          </div>
+          <div class="form-group">
+            <label for="maxUses">Total Usage Limit</label>
+            <input type="number" id="maxUses" name="max_uses" placeholder="100" value="100" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="expiresAt">Expiration Date (Optional)</label>
+          <input type="date" id="expiresAt" name="expires_at" class="form-input">
+        </div>
+
+        <button type="submit" class="btn-primary">Generate Promo Code</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include("../../partials/admin-footer") %>

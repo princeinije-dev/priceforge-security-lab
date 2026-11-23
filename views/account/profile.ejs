@@ -1,0 +1,82 @@
+<%- include("../partials/header", { title: "Profile Settings" }) %>
+
+<section class="container profile-page">
+  <div class="page-header-row">
+    <div>
+      <span class="eyebrow">PREFERENCES</span>
+      <h1>Account Settings</h1>
+      <p>Update your personal information and account security credentials.</p>
+    </div>
+    <a href="/account" class="btn-secondary btn-sm">← Back to Dashboard</a>
+  </div>
+
+  <!-- Security Lab Notice for CSRF -->
+  <div class="lab-instruction-box">
+    <div class="lab-instruction-header">
+      <span class="badge-lab">SECURITY LAB NOTICE</span>
+      <strong>Cross-Site Request Forgery (CSRF) Testing Target</strong>
+    </div>
+    <p>
+      The <strong>Update Profile Details</strong> form below performs a state-changing POST request to <code>/account/profile</code> without requiring a CSRF token or anti-forgery validation. An external website or crafted HTML page can submit this form on behalf of an authenticated victim whose browser includes ambient cookies.
+    </p>
+  </div>
+
+  <div class="profile-cards-grid">
+    <!-- Profile Info Form -->
+    <div class="profile-form-card">
+      <div class="card-title-row">
+        <h3>Personal Information</h3>
+        <span class="role-badge role-<%= accountUser.role %>"><%= accountUser.role %></span>
+      </div>
+      <p class="card-desc">Keep your contact details current for order status updates.</p>
+
+      <form action="/account/profile" method="POST" class="standard-form">
+        <div class="form-group">
+          <label for="profileName">Full Name</label>
+          <input type="text" id="profileName" name="name" value="<%= accountUser.name %>" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label for="profileEmail">Email Address</label>
+          <input type="email" id="profileEmail" name="email" value="<%= accountUser.email %>" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label>Account Role</label>
+          <input type="text" value="<%= accountUser.role %>" class="form-input" disabled style="background: #f1f5f9;">
+        </div>
+
+        <button type="submit" class="btn-primary">Save Profile Changes</button>
+      </form>
+    </div>
+
+    <!-- Change Password Form -->
+    <div class="profile-form-card">
+      <div class="card-title-row">
+        <h3>Change Password</h3>
+      </div>
+      <p class="card-desc">Ensure your account is protected with a secure password of at least 8 characters.</p>
+
+      <form action="/account/change-password" method="POST" class="standard-form">
+        <div class="form-group">
+          <label for="currentPassword">Current Password</label>
+          <input type="password" id="currentPassword" name="currentPassword" placeholder="••••••••" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label for="newPassword">New Password</label>
+          <input type="password" id="newPassword" name="newPassword" placeholder="Minimum 8 characters" class="form-input" minlength="8" required>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm New Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter new password" class="form-input" minlength="8" required>
+        </div>
+
+        <button type="submit" class="btn-primary">Update Password</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<%- include("../partials/footer") %>

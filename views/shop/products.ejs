@@ -1,0 +1,203 @@
+<%- include("../partials/header", { title: title || "Electronics Store" }) %>
+
+<!-- Hero section only shown on main catalog without search query -->
+<% if (!searchQuery && currentCategory === 'all' && (!currentPage || currentPage === 1)) { %>
+  <section class="store-hero">
+    <div class="store-hero-inner">
+      <div class="store-hero-content">
+        <span class="eyebrow eyebrow-light">PRECISION ENGINEERING</span>
+        <h1>Engineered for sound,<br>speed & seamless work.</h1>
+        <p>Explore audiophile studio headphones, tactile mechanical switches, lightning-fast docks, and precision gaming peripherals.</p>
+        <div class="hero-actions">
+          <a href="#catalog" class="btn-primary">Browse All Tech →</a>
+          <a href="/products?category=Audio" class="btn-secondary btn-secondary-light">Explore Audio</a>
+        </div>
+      </div>
+      <div class="store-hero-stats">
+        <div class="hero-stat-card">
+          <strong>40+ hrs</strong>
+          <span>Battery Studio Pro</span>
+        </div>
+        <div class="hero-stat-card">
+          <strong>40 Gbps</strong>
+          <span>Thunderbolt Docks</span>
+        </div>
+        <div class="hero-stat-card">
+          <strong>1000 Hz</strong>
+          <span>Polling Rate Mice</span>
+        </div>
+      </div>
+    </div>
+  </section>
+<% } %>
+
+<!-- Catalog Section -->
+<section class="container catalog-section" id="catalog">
+  <!-- Search banner & Reflected XSS Lab point -->
+  <% if (searchQuery) { %>
+    <div class="search-result-banner">
+      <div>
+        <span class="eyebrow">SEARCH RESULTS</span>
+        <!-- INTENTIONAL LAB VULNERABILITY (Reflected XSS):
+             The searchQuery is output unescaped to allow demonstration of reflected XSS in this designated lab spot -->
+        <h2>Results for “<%- searchQuery %>”</h2>
+        <p>Found <strong><%= totalItems %></strong> matching <%= totalItems === 1 ? 'item' : 'items' %> in catalog.</p>
+      </div>
+      <a href="/products" class="btn-secondary btn-sm">Clear Search ✕</a>
+    </div>
+  <% } %>
+
+  <!-- Category filter navigation tabs -->
+  <div class="catalog-header-bar">
+    <div class="category-tabs">
+      <a href="/products<%= searchQuery ? '?search=' + encodeURIComponent(searchQuery) : '' %>" class="category-tab <%= currentCategory === 'all' ? 'active' : '' %>">
+        All Gear
+      </a>
+      <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+        <% categories.forEach(cat => { %>
+          <a href="/products?category=<%= encodeURIComponent(cat) %><%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %>" 
+             class="category-tab <%= currentCategory === cat ? 'active' : '' %>">
+            <%= cat %>
+          </a>
+        <% }); %>
+      <% } else { %>
+        <a href="/products?category=Audio" class="category-tab <%= currentCategory === 'Audio' ? 'active' : '' %>">Audio</a>
+        <a href="/products?category=Gaming" class="category-tab <%= currentCategory === 'Gaming' ? 'active' : '' %>">Gaming</a>
+        <a href="/products?category=Accessories" class="category-tab <%= currentCategory === 'Accessories' ? 'active' : '' %>">Accessories</a>
+        <a href="/products?category=Connectivity" class="category-tab <%= currentCategory === 'Connectivity' ? 'active' : '' %>">Connectivity</a>
+      <% } %>
+    </div>
+
+    <!-- Filter & Sort controls form -->
+    <form action="/products" method="GET" class="catalog-filters-form">
+      <% if (currentCategory && currentCategory !== 'all') { %>
+        <input type="hidden" name="category" value="<%= currentCategory %>">
+      <% } %>
+      <% if (searchQuery) { %>
+        <input type="hidden" name="search" value="<%= searchQuery %>">
+      <% } %>
+
+      <div class="filter-controls-group">
+        <div class="price-filter-inputs">
+          <input type="number" name="minPrice" placeholder="Min ₦" value="<%= minPrice %>" class="filter-input-sm">
+          <span>-</span>
+          <input type="number" name="maxPrice" placeholder="Max ₦" value="<%= maxPrice %>" class="filter-input-sm">
+        </div>
+
+        <select name="sort" class="filter-select" onchange="this.form.submit()">
+          <option value="newest" <%= currentSort === 'newest' ? 'selected' : '' %>>Newest First</option>
+          <option value="price-asc" <%= currentSort === 'price-asc' ? 'selected' : '' %>>Price: Low to High</option>
+          <option value="price-desc" <%= currentSort === 'price-desc' ? 'selected' : '' %>>Price: High to Low</option>
+          <option value="popularity" <%= currentSort === 'popularity' ? 'selected' : '' %>>Best Selling</option>
+        </select>
+
+        <button type="submit" class="btn-filter-apply">Filter</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Product Grid -->
+  <% if (!products || products.length === 0) { %>
+    <div class="empty-catalog-card">
+      <div class="empty-icon">🔍</div>
+      <h3>No products matched your criteria</h3>
+      <p>Try resetting the category filter, widening your price range, or searching for other electronics.</p>
+      <a href="/products" class="btn-primary">View Full Catalog →</a>
+    </div>
+  <% } else { %>
+    <div class="product-grid">
+      <% products.forEach(product => { %>
+        <article class="product-card">
+          <div class="product-image-container">
+            <a href="/products/<%= product.id %>" class="product-img-link">
+              <% if (product.image_url) { %>
+                <img src="<%= product.image_url %>" alt="<%= product.name %>" loading="lazy" class="product-thumb">
+              <% } else { %>
+                <div class="product-placeholder">DEVICE</div>
+              <% } %>
+            </a>
+
+            <!-- Category tag -->
+            <span class="product-tag-pill"><%= product.category || 'Hardware' %></span>
+
+            <!-- Wishlist quick action toggle -->
+            <form action="/wishlist/add" method="POST" class="card-wishlist-form">
+              <input type="hidden" name="productId" value="<%= product.id %>">
+              <button type="submit" class="card-wishlist-btn" title="Add to Wishlist">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              </button>
+            </form>
+          </div>
+
+          <div class="product-body">
+            <div class="product-meta-row">
+              <span class="product-cat-name"><%= product.category %></span>
+              <!-- Rating snippet -->
+              <% const ratingVal = Number(product.avg_rating) || 0; %>
+              <div class="product-rating-stars" title="<%= ratingVal > 0 ? ratingVal + ' / 5 stars' : 'No reviews yet' %>">
+                ★ <span><%= ratingVal > 0 ? ratingVal.toFixed(1) : 'New' %></span>
+                <% if (product.review_count > 0) { %>
+                  <small>(<%= product.review_count %>)</small>
+                <% } %>
+              </div>
+            </div>
+
+            <h3 class="product-title">
+              <a href="/products/<%= product.id %>"><%= product.name %></a>
+            </h3>
+
+            <p class="product-snippet"><%= product.description ? product.description.slice(0, 75) + '...' : '' %></p>
+
+            <div class="product-footer-row">
+              <div class="price-and-stock">
+                <strong class="product-price">₦<%= Number(product.price).toLocaleString("en-NG") %></strong>
+                <% if (product.stock > 10) { %>
+                  <span class="stock-status-pill in-stock">● In stock</span>
+                <% } else if (product.stock > 0) { %>
+                  <span class="stock-status-pill low-stock">● <%= product.stock %> left</span>
+                <% } else { %>
+                  <span class="stock-status-pill out-of-stock">● Out of stock</span>
+                <% } %>
+              </div>
+
+              <% if (product.stock > 0) { %>
+                <form action="/cart/add" method="POST" class="add-to-cart-form">
+                  <input type="hidden" name="productId" value="<%= product.id %>">
+                  <button type="submit" class="btn-add-cart" title="Add to Cart">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>Add</span>
+                  </button>
+                </form>
+              <% } else { %>
+                <button class="btn-add-cart disabled" disabled>Sold out</button>
+              <% } %>
+            </div>
+          </div>
+        </article>
+      <% }); %>
+    </div>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+      <div class="pagination-bar">
+        <% if (currentPage > 1) { %>
+          <a href="/products?page=<%= currentPage - 1 %><%= currentCategory !== 'all' ? '&category=' + encodeURIComponent(currentCategory) : '' %><%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %><%= currentSort ? '&sort=' + currentSort : '' %>" class="page-link">← Previous</a>
+        <% } %>
+
+        <div class="page-numbers">
+          <% for (let p = 1; p <= totalPages; p++) { %>
+            <a href="/products?page=<%= p %><%= currentCategory !== 'all' ? '&category=' + encodeURIComponent(currentCategory) : '' %><%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %><%= currentSort ? '&sort=' + currentSort : '' %>" class="page-number <%= p === currentPage ? 'active' : '' %>">
+              <%= p %>
+            </a>
+          <% } %>
+        </div>
+
+        <% if (currentPage < totalPages) { %>
+          <a href="/products?page=<%= currentPage + 1 %><%= currentCategory !== 'all' ? '&category=' + encodeURIComponent(currentCategory) : '' %><%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %><%= currentSort ? '&sort=' + currentSort : '' %>" class="page-link">Next →</a>
+        <% } %>
+      </div>
+    <% } %>
+  <% } %>
+</section>
+
+<%- include("../partials/footer") %>

@@ -1,0 +1,92 @@
+<%- include("../../partials/admin-header", { title: product ? `Edit: ${product.name}` : "Add Hardware Product" }) %>
+
+<div class="admin-page-header">
+  <div>
+    <a href="/admin/products" class="btn-text-muted btn-sm">← Back to Inventory</a>
+    <h1><%= product ? `Edit Hardware: ${product.name}` : "Create New Hardware SKU" %></h1>
+    <p>Configure hardware specifications, inventory balance, and product media.</p>
+  </div>
+</div>
+
+<!-- Security Lab Explanatory Box for File Upload -->
+<div class="lab-instruction-box">
+  <div class="lab-instruction-header">
+    <span class="badge-lab">SECURITY LAB NOTICE</span>
+    <strong>Insecure File Upload Implementation</strong>
+  </div>
+  <p>
+    The image upload field below processes files using a permissive backend Multer configuration without file extension allowlists or magic number validation. Uploaded assets are preserved in <code>public/uploads/</code> for penetration testing demonstrations.
+  </p>
+</div>
+
+<div class="admin-form-container">
+  <div class="panel-card">
+    <form action="<%= product ? `/admin/products/${product.id}/edit` : '/admin/products/new' %>" method="POST" enctype="multipart/form-data" class="standard-form">
+      <div class="form-row">
+        <div class="form-group flex-2">
+          <label for="prodName">Product Name / Title</label>
+          <input type="text" id="prodName" name="name" value="<%= product ? product.name : '' %>" placeholder="e.g. Studio Monitor Pro X" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="prodCategory">Category</label>
+          <select id="prodCategory" name="category" class="form-select" required>
+            <option value="Audio" <%= product && product.category === 'Audio' ? 'selected' : '' %>>Audio</option>
+            <option value="Gaming" <%= product && product.category === 'Gaming' ? 'selected' : '' %>>Gaming</option>
+            <option value="Accessories" <%= product && product.category === 'Accessories' ? 'selected' : '' %>>Accessories</option>
+            <option value="Connectivity" <%= product && product.category === 'Connectivity' ? 'selected' : '' %>>Connectivity</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="prodPrice">Retail Price (₦ Naira)</label>
+          <input type="number" step="0.01" id="prodPrice" name="price" value="<%= product ? product.price : '' %>" placeholder="45000.00" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="prodStock">Available Stock Units</label>
+          <input type="number" id="prodStock" name="stock" value="<%= product ? product.stock : '25' %>" placeholder="25" class="form-input" min="0" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="prodDesc">Product Description</label>
+        <textarea id="prodDesc" name="description" rows="4" placeholder="Detailed engineering specs, driver size, ports, battery life..." class="form-textarea"><%= product ? product.description : '' %></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="prodImageUrl">External Image URL</label>
+          <input type="url" id="prodImageUrl" name="image_url" value="<%= product ? product.image_url : '' %>" placeholder="https://images.unsplash.com/..." class="form-input">
+          <small class="form-hint">Paste an Unsplash or external CDN image link</small>
+        </div>
+        <div class="form-group">
+          <label for="prodImageFile">Or Upload Local Image File</label>
+          <input type="file" id="prodImageFile" name="image" class="form-input file-input">
+          <small class="form-hint">Accepted in local public/uploads directory</small>
+        </div>
+      </div>
+
+      <% if (product && product.image_url) { %>
+        <div class="current-media-preview">
+          <label>Current Image Preview:</label>
+          <img src="<%= product.image_url %>" alt="<%= product.name %>" class="preview-thumb">
+        </div>
+      <% } %>
+
+      <div class="form-checkbox-row" style="margin-top: 16px;">
+        <input type="checkbox" id="isActive" name="is_active" value="true" <%= !product || product.is_active ? 'checked' : '' %>>
+        <label for="isActive">Active in Storefront (Visible to customers)</label>
+      </div>
+
+      <div class="form-actions-bar">
+        <button type="submit" class="btn-primary">
+          <%= product ? "Save Changes" : "Create Product" %> →
+        </button>
+        <a href="/admin/products" class="btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include("../../partials/admin-footer") %>

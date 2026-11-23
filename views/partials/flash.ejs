@@ -1,0 +1,31 @@
+<% if (locals.flash && locals.flash.success) { %>
+  <div class="flash-alert flash-success">
+    <span class="flash-icon">✓</span>
+    <span class="flash-text"><%= locals.flash.success %></span>
+    <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+  </div>
+<% } %>
+
+<% if (locals.flash && locals.flash.error) { %>
+  <div class="flash-alert flash-error">
+    <span class="flash-icon">⚠</span>
+    <span class="flash-text"><%= locals.flash.error %></span>
+    <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+  </div>
+<% } %>
+
+<% if (typeof success !== "undefined" && success) { %>
+  <div class="flash-alert flash-success">
+    <span class="flash-icon">✓</span>
+    <span class="flash-text"><%= success %></span>
+    <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+  </div>
+<% } %>
+
+<% if (typeof error !== "undefined" && error) { %>
+  <div class="flash-alert flash-error">
+    <span class="flash-icon">⚠</span>
+    <span class="flash-text"><%= error %></span>
+    <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+  </div>
+<% } %>

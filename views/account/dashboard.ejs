@@ -1,0 +1,113 @@
+<%- include("../partials/header", { title: "Customer Dashboard" }) %>
+
+<section class="container account-page">
+  <div class="account-welcome-banner">
+    <div class="account-user-intro">
+      <span class="user-big-avatar"><%= accountUser.name.charAt(0).toUpperCase() %></span>
+      <div>
+        <span class="eyebrow">CUSTOMER PORTAL</span>
+        <h1>Welcome, <%= accountUser.name %></h1>
+        <p><%= accountUser.email %> • Member since <%= new Date(accountUser.created_at).toLocaleDateString("en-NG", { year: 'numeric', month: 'long' }) %></p>
+      </div>
+    </div>
+    <div class="account-header-actions">
+      <a href="/account/profile" class="btn-secondary btn-sm">Edit Profile ⚙️</a>
+      <a href="/products" class="btn-primary btn-sm">Shop Electronics →</a>
+    </div>
+  </div>
+
+  <div class="account-stats-grid">
+    <div class="account-stat-card">
+      <span class="stat-icon">📦</span>
+      <div>
+        <span class="stat-label">Total Orders</span>
+        <strong class="stat-num"><%= totalOrders %></strong>
+      </div>
+    </div>
+    <div class="account-stat-card">
+      <span class="stat-icon">📍</span>
+      <div>
+        <span class="stat-label">Default Address</span>
+        <strong class="stat-val"><%= defaultAddress ? `${defaultAddress.city}, ${defaultAddress.state}` : 'None configured' %></strong>
+      </div>
+    </div>
+    <div class="account-stat-card">
+      <span class="stat-icon">🛡️</span>
+      <div>
+        <span class="stat-label">Account Role</span>
+        <strong class="stat-val"><span class="role-badge role-<%= accountUser.role %>"><%= accountUser.role %></span></strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="account-sections-grid">
+    <!-- Recent Orders -->
+    <div class="account-panel-card">
+      <div class="panel-header-row">
+        <h3>Recent Orders</h3>
+        <a href="/orders" class="panel-link">View all (<%= totalOrders %>) →</a>
+      </div>
+
+      <% if (!recentOrders || recentOrders.length === 0) { %>
+        <div class="panel-empty-state">
+          <p>You haven't placed any orders yet.</p>
+          <a href="/products" class="btn-secondary btn-sm">Browse catalog</a>
+        </div>
+      <% } else { %>
+        <div class="panel-orders-list">
+          <% recentOrders.forEach(ord => { %>
+            <div class="panel-order-item">
+              <div>
+                <strong>#<%= ord.id %></strong>
+                <small class="d-block text-muted"><%= new Date(ord.created_at).toLocaleDateString("en-NG") %></small>
+              </div>
+              <div>
+                <span class="status-badge status-<%= ord.status.toLowerCase() %>"><%= ord.status %></span>
+              </div>
+              <div>
+                <strong>₦<%= Number(ord.total_amount).toLocaleString("en-NG") %></strong>
+              </div>
+              <div>
+                <a href="/orders/<%= ord.id %>" class="btn-secondary btn-xs">Details</a>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Quick Shortcuts & Saved Address snippet -->
+    <div class="account-panel-card">
+      <div class="panel-header-row">
+        <h3>Primary Delivery Address</h3>
+        <a href="/account/addresses" class="panel-link">Manage Addresses →</a>
+      </div>
+
+      <% if (defaultAddress) { %>
+        <div class="primary-addr-display">
+          <strong><%= defaultAddress.full_name %></strong>
+          <p><%= defaultAddress.street_address %></p>
+          <p><%= defaultAddress.city %>, <%= defaultAddress.state %> <%= defaultAddress.postal_code || '' %></p>
+          <small>Phone: <%= defaultAddress.phone || 'N/A' %></small>
+        </div>
+      <% } else { %>
+        <div class="panel-empty-state">
+          <p>No delivery address saved yet.</p>
+          <a href="/account/addresses" class="btn-secondary btn-sm">+ Add Address</a>
+        </div>
+      <% } %>
+
+      <div class="quick-nav-block">
+        <h4>Account Shortcuts</h4>
+        <div class="shortcuts-grid">
+          <a href="/account/profile" class="shortcut-pill">⚙️ Profile & Password</a>
+          <a href="/account/addresses" class="shortcut-pill">📍 Delivery Addresses</a>
+          <a href="/wishlist" class="shortcut-pill">♡ Saved Wishlist</a>
+          <a href="/cart" class="shortcut-pill">🛒 Shopping Cart</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include("../partials/footer") %>
